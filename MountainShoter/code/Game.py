@@ -1,25 +1,26 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import pygame
-import sys  # Importante colocar isso no topo para o sys.exit() funcionar lá embaixo
+import sys
 
 from code.Menu import Menu
-
+from code.const import WIN_WIDTH
 
 class Game:
     def __init__(self):
         pygame.init()
-        self.window = pygame.display_set_mode(size=(800, 600))
+        self.window = pygame.display.set_mode((800, 600))
 
     def run(self):
+        menu = Menu(self.window)
+
         while True:
-            menu = Menu(self.window)
+            self.window.fill((0, 0, 0))
             menu.run()
-            pass
 
-            # for event in pygame.event.get():
-            #    if event.type == pygame.QUIT:
-            #        pygame.quit()
-            #        quit()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
 
-
+            pygame.display.update()
