@@ -1,19 +1,25 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 import pygame
-from Menu import Menu
-from Level import Level
+import sys  # Importante colocar isso no topo para o sys.exit() funcionar lá embaixo
+
+from code.Menu import Menu
+
 
 class Game:
     def __init__(self):
         pygame.init()
-        self.window = pygame.display.set_mode((800, 600))
-        self.menu = Menu(self.window)
-        self.levels = [Level(self.window, "Fase 1")]
+        self.window = pygame.display_set_mode(size=(800, 600))
 
     def run(self):
-        # Aqui entra o loop principal do jogo (While True)
-        self.menu.run()
-        self.levels[0].run()
+        while True:
+            menu = Menu(self.window)
+            menu.run()
+            pass
 
-if __name__ == "__main__":
-    jogo = Game()
-    jogo.run()
+            # for event in pygame.event.get():
+            #    if event.type == pygame.QUIT:
+            #        pygame.quit()
+            #        quit()
+
+
