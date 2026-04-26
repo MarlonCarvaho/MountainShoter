@@ -12,5 +12,6 @@ while True:
     # chegando todos os eventos
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
+            print("cteste do github")
             pygame.quit() # esse fecha a janela
             sys.exit() # esse encerra a janela
