@@ -1,36 +1,37 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 import pygame
+import sys
+
+from code.const import color_vermelho, color_branco, menu_option
 
 
 class Menu:
     def __init__(self, window):
         self.window = window
-
-        # Carrega a imagem e redimensiona
         self.surf = pygame.image.load('./asset/menu.png')
         self.surf = pygame.transform.scale(self.surf, (800, 600))
         self.rect = self.surf.get_rect(left=0, top=0)
-
-        # Carrega e dá o play na música (em loop infinito)
         pygame.mixer.music.load('./asset/menu.wav')
         pygame.mixer.music.play(-1)
 
-    def run(self):
-        # Apenas desenha a imagem de fundo na tela a cada frame
-        self.window.blit(source=self.surf, dest=self.rect)
-
-        # EXEMPLO DE USO: Chamando a função de texto para aparecer na tela.
-        # Texto: "MOUNTAIN SHOOTER", Tamanho: 50, Cor: Branco (255, 255, 255), Posição Centro: x=400, y=100
-        self.menu_text("MOUNTAIN SHOOTER", 50, (255, 255, 255), (400, 100))
-
-    # Função puxada para fora do run() para fazer parte da classe
-    def menu_text(self, text: str, text_size: int, text_color: tuple, text_center_pos: tuple):
-        # Usando SysFont para pegar a fonte direto do sistema
-        text_font = pygame.font.SysFont('lucida sans typewriter', text_size)
-
-        # Sintaxe corrigida: passando as variáveis diretas e usando True maiúsculo
+    def menu_text(self, text_size: int, text: str, text_color: tuple, text_center_pos: tuple):
+        # Troque "SysFont" por "Font" e coloque o caminho do arquivo
+        text_font = pygame.font.Font('./asset/Creepster-Regular.ttf', text_size)
         text_surf = text_font.render(text, True, text_color).convert_alpha()
-
         text_rect = text_surf.get_rect(center=text_center_pos)
-        self.window.blit(text_surf, text_rect)
+        self.window.blit(source=text_surf, dest=text_rect)
+
+    def run(self):
+        menu_running = True
+        while menu_running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+            self.window.blit(source=self.surf, dest=self.rect)
+
+            #self.menu_text(30, "Meu Jogo", color_branco, (400, 300))
+            self.menu_text(50," jogo de terro",color_vermelho,(400,200) )
+
+            for i in range(len(menu_option)):
+                self.menu_text( 30,menu_option[i],color_branco,(400,300 +30 *i))
+            pygame.display.flip()
