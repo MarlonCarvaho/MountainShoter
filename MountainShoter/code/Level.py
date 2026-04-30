@@ -15,7 +15,18 @@ class Level:
         self.name = name
         self.game_mode = game_mode
 
-        self.bg_list = EntityFactory.get_entity('fase01pt1')
+        # --- CARREGA RECURSOS BASEADO NA FASE ---
+        if self.name == 'level1':
+            self.bg_list = EntityFactory.get_entity('fase01pt1')
+            pygame.mixer.music.load('./asset/fase01.wav')
+            self.difficulty = 1.0  # Dificuldade normal
+        elif self.name == 'level2':
+            self.bg_list = EntityFactory.get_entity('faze02')
+            pygame.mixer.music.load('./asset/faze02.wav')
+            self.difficulty = 1.3  # 30% mais difícil!
+
+        pygame.mixer.music.play(-1)
+
         self.player_list = []
         self.enemy_list = []
         self.projectile_list = []
@@ -24,25 +35,26 @@ class Level:
 
         if self.game_mode == menu_option[1]:
             self.player_list.append(EntityFactory.get_entity("Mago2", (100, 400)))
-
         elif self.game_mode == menu_option[2]:
             p2 = EntityFactory.get_entity("Mago2", (650, 300))
-            p2.set_orientation(-1)  # Nova forma mais segura de virar o Mago 2!
+            p2.set_orientation(-1)
             self.player_list.append(p2)
 
         self.spawn_timer = 0
-        self.game_over_timer = 0  # Tempo que a tela fica parada antes de voltar ao menu
-
-        pygame.mixer.music.load('./asset/fase01.wav')
-        pygame.mixer.music.play(-1)
+        self.game_over_timer = 0
+        self.enemies_killed = 0
+        self.survive_timer = 60 * 60
 
     def run(self):
         clock = pygame.time.Clock()
-        # Fonte para o texto do timer de reviver
         font_timer = pygame.font.SysFont("Lucida Sans Typewriter", 18)
+        font_hud = pygame.font.SysFont("Lucida Sans Typewriter", 24)
 
         while True:
             clock.tick(60)
+
+            if self.survive_timer > 0:
+                self.survive_timer -= 1
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -61,12 +73,16 @@ class Level:
             if self.game_mode != menu_option[2]:
                 if self.spawn_timer <= 0:
                     spawn_y = random.randint(50, 500)
-                    self.enemy_list.append(EntityFactory.get_entity("Inimigo", (730, spawn_y)))
-                    self.spawn_timer = random.randint(60, 150)
+                    # Passa a dificuldade para o Factory gerar o inimigo mais forte!
+                    self.enemy_list.append(EntityFactory.get_entity("Inimigo", (730, spawn_y), self.difficulty))
+
+                    # O tempo de nascer novos inimigos também fica 30% mais rápido!
+                    tempo_min = int(60 / self.difficulty)
+                    tempo_max = int(150 / self.difficulty)
+                    self.spawn_timer = random.randint(tempo_min, tempo_max)
                 else:
                     self.spawn_timer -= 1
 
-            # --- SISTEMA DE COLISÃO ---
             for proj in self.projectile_list[:]:
                 hit_something = False
 
@@ -77,11 +93,11 @@ class Level:
                             hit_something = True
                             if enemy.health <= 0:
                                 self.enemy_list.remove(enemy)
+                                self.enemies_killed += 1
                             break
 
                     if self.game_mode == menu_option[2]:
                         for player in self.player_list:
-                            # Agora checa se o jogador não está morto antes de tomar dano
                             if proj.rect.colliderect(player.rect) and not player.is_dead:
                                 if (player.player_type == 1 and proj.speed_x < 0) or (
                                         player.player_type == 2 and proj.speed_x > 0):
@@ -98,7 +114,6 @@ class Level:
                             hit_something = True
                             if player.health <= 0:
                                 player.die()
-                                # Se for modo Co-op, coloca 10 segundos de punição (600 frames)
                                 if self.game_mode == menu_option[1]:
                                     player.respawn_timer = 600
                             break
@@ -107,7 +122,6 @@ class Level:
                     if proj in self.projectile_list:
                         self.projectile_list.remove(proj)
 
-            # --- DESENHANDO NA TELA ---
             self.window.fill((0, 0, 0))
 
             for bg in self.bg_list:
@@ -139,43 +153,56 @@ class Level:
                     else:
                         bar_x, bar_y = 10, 30
 
-                        # Se o jogador estiver vivo, desenha a barra normal
                 if not player.is_dead:
                     vida_porcentagem = max(0, player.health) / player.max_health
                     pygame.draw.rect(self.window, (255, 0, 0), (bar_x, bar_y, bar_width, bar_height))
                     pygame.draw.rect(self.window, (0, 255, 0), (bar_x, bar_y, bar_width * vida_porcentagem, bar_height))
                     pygame.draw.rect(self.window, (255, 255, 255), (bar_x, bar_y, bar_width, bar_height), 1)
-
-                # Se estiver morto e no modo Co-op com timer rodando, desenha o texto
                 elif self.game_mode == menu_option[1] and player.respawn_timer > 0:
-                    segundos = player.respawn_timer // 60  # Divide os frames para ter segundos reais
+                    segundos = player.respawn_timer // 60
                     texto_timer = font_timer.render(f"Revive em: {segundos}s", True, (255, 255, 0))
                     self.window.blit(texto_timer, (bar_x, bar_y))
 
-            # --- SISTEMA DE GAME OVER (VOLTAR AO MENU) ---
+            if self.game_mode != menu_option[2]:
+                segundos_restantes = max(0, self.survive_timer // 60)
+
+                texto_tempo = font_hud.render(f"Tempo: {segundos_restantes}s", True, (255, 255, 255))
+                self.window.blit(texto_tempo, (350, 10))
+
+                texto_kills = font_hud.render(f"Abates: {self.enemies_killed}/10", True, (255, 255, 255))
+                self.window.blit(texto_kills, (350, 35))
+
+            # --- SISTEMA DE RETORNO DO RESULTADO ---
             is_game_over = False
+            is_victory = False
 
-            # Solo: Mago 1 morreu = Game Over
             if self.game_mode == menu_option[0]:
-                if self.player_list[0].is_dead:
-                    is_game_over = True
-
-            # Coop: Os DOIS Magos morreram = Game Over
+                if self.player_list[0].is_dead: is_game_over = True
             elif self.game_mode == menu_option[1]:
-                if self.player_list[0].is_dead and self.player_list[1].is_dead:
-                    is_game_over = True
-
-            # Competitivo: Qualquer um morreu = Game Over
+                if self.player_list[0].is_dead and self.player_list[1].is_dead: is_game_over = True
             elif self.game_mode == menu_option[2]:
-                if self.player_list[0].is_dead or self.player_list[1].is_dead:
-                    is_game_over = True
+                if self.player_list[0].is_dead or self.player_list[1].is_dead: is_game_over = True
 
-            if is_game_over:
+            if self.game_mode != menu_option[2]:
+                if self.enemies_killed >= 10 or self.survive_timer <= 0:
+                    is_victory = True
+
+            if is_game_over or is_victory:
                 self.game_over_timer += 1
-                if self.game_over_timer > 180:  # Espera 3 segundos com os corpos no chão
-                    return  # Quebra o ciclo, o que faz o jogo voltar automaticamente pro Menu!
+
+                if is_victory and not is_game_over:
+                    # Se for level 1, avisa que vai para a próxima fase. Se for level 2, avisa que zerou!
+                    texto_msg = "INICIANDO FASE 2..." if self.name == 'level1' else "VOCÊ ZEROU O JOGO!"
+                    texto_vitoria = font_hud.render(texto_msg, True, (0, 255, 0))
+                    self.window.blit(texto_vitoria, (300, 300))
+
+                if self.game_over_timer > 180:
+                    # AGORA ELE DEVOLVE "WIN" SE GANHOU, OU "GAMEOVER" SE PERDEU
+                    if is_victory and not is_game_over:
+                        return "WIN"
+                    else:
+                        return "GAMEOVER"
             else:
-                self.game_over_timer = 0  # Reseta o timer caso alguém seja revivido no Coop
-            # ---------------------------------------------
+                self.game_over_timer = 0
 
             pygame.display.flip()

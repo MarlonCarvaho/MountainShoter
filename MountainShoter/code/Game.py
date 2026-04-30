@@ -7,6 +7,7 @@ from code.Menu import Menu
 from code.Level import Level
 from code.const import menu_option
 
+
 class Game:
     def __init__(self):
         pygame.init()
@@ -16,6 +17,9 @@ class Game:
         menu = Menu(self.window)
 
         while True:
+            pygame.mixer.music.load('./asset/menu.wav')
+            pygame.mixer.music.play(-1)
+
             self.window.fill((0, 0, 0))
             menu_return = menu.run()
 
@@ -24,10 +28,16 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
-            # AGORA ELE ACEITA OS 3 MODOS (0, 1 e 2)
             if menu_return in [menu_option[0], menu_option[1], menu_option[2]]:
-                level = Level(self.window, 'level1', menu_return)
-                level.run()
+                # Inicia a Fase 1 e guarda o resultado
+                level1 = Level(self.window, 'level1', menu_return)
+                resultado = level1.run()
+
+                # Se venceu a Fase 1 (e não for o modo Competitivo), vai para a Fase 2!
+                if resultado == "WIN" and menu_return != menu_option[2]:
+                    level2 = Level(self.window, 'level2', menu_return)
+                    level2.run()
+
             elif menu_return == menu_option[4]:
                 pygame.quit()
                 sys.exit()
