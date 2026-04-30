@@ -4,9 +4,8 @@ import pygame
 import sys
 
 from code.Menu import Menu
-from code.Level import Level  # O L agora é maiúsculo!
-from code.const import WIN_WIDTH, menu_option
-
+from code.Level import Level
+from code.const import menu_option
 
 class Game:
     def __init__(self):
@@ -18,8 +17,6 @@ class Game:
 
         while True:
             self.window.fill((0, 0, 0))
-
-            # Pega a escolha do jogador
             menu_return = menu.run()
 
             for event in pygame.event.get():
@@ -27,13 +24,11 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
-            # Checa qual opção foi escolhida
-            if menu_return == menu_option[0]:
-                # Inicia a fase 1
+            # AGORA ELE ACEITA OS 3 MODOS (0, 1 e 2)
+            if menu_return in [menu_option[0], menu_option[1], menu_option[2]]:
                 level = Level(self.window, 'level1', menu_return)
                 level.run()
             elif menu_return == menu_option[4]:
-                # Sai do jogo
                 pygame.quit()
                 sys.exit()
 
