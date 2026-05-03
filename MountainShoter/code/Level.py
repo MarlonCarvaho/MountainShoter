@@ -19,11 +19,11 @@ class Level:
         if self.name == 'level1':
             self.bg_list = EntityFactory.get_entity('fase01pt1')
             pygame.mixer.music.load('./asset/fase01.wav')
-            self.difficulty = 1.0  # Dificuldade normal
+            self.difficulty = 1.0
         elif self.name == 'level2':
             self.bg_list = EntityFactory.get_entity('faze02')
             pygame.mixer.music.load('./asset/faze02.wav')
-            self.difficulty = 1.3  # 30% mais difícil!
+            self.difficulty = 1.3
 
         pygame.mixer.music.play(-1)
 
@@ -50,6 +50,14 @@ class Level:
         font_timer = pygame.font.SysFont("Lucida Sans Typewriter", 18)
         font_hud = pygame.font.SysFont("Lucida Sans Typewriter", 24)
 
+        # --- NOVA FONTE PARA A MENSAGEM DE FASE ---
+        # Lendo a mesma fonte de terror do menu (tamanho 65 para ficar grande)
+        try:
+            font_msg = pygame.font.Font('./asset/Creepster-Regular.ttf', 65)
+        except:
+            # Fonte de segurança caso o arquivo mude de nome
+            font_msg = pygame.font.SysFont("Lucida Sans Typewriter", 65)
+
         while True:
             clock.tick(60)
 
@@ -73,10 +81,8 @@ class Level:
             if self.game_mode != menu_option[2]:
                 if self.spawn_timer <= 0:
                     spawn_y = random.randint(50, 500)
-                    # Passa a dificuldade para o Factory gerar o inimigo mais forte!
                     self.enemy_list.append(EntityFactory.get_entity("Inimigo", (730, spawn_y), self.difficulty))
 
-                    # O tempo de nascer novos inimigos também fica 30% mais rápido!
                     tempo_min = int(60 / self.difficulty)
                     tempo_max = int(150 / self.difficulty)
                     self.spawn_timer = random.randint(tempo_min, tempo_max)
@@ -191,13 +197,24 @@ class Level:
                 self.game_over_timer += 1
 
                 if is_victory and not is_game_over:
-                    # Se for level 1, avisa que vai para a próxima fase. Se for level 2, avisa que zerou!
                     texto_msg = "INICIANDO FASE 2..." if self.name == 'level1' else "VOCÊ ZEROU O JOGO!"
-                    texto_vitoria = font_hud.render(texto_msg, True, (0, 255, 0))
-                    self.window.blit(texto_vitoria, (300, 300))
+
+                    # --- MELHORIA DA MENSAGEM ---
+                    # Renderiza com cor branca brilhante para destacar bastante
+                    texto_vitoria = font_msg.render(texto_msg, True, (255, 255, 255))
+
+                    # Centraliza perfeitamente no meio da tela (800x600 -> o meio é 400x300)
+                    text_rect = texto_vitoria.get_rect(center=(400, 300))
+
+                    # Cria a sombra preta para o texto saltar aos olhos e não se misturar com o fundo
+                    texto_sombra = font_msg.render(texto_msg, True, (0, 0, 0))
+                    sombra_rect = texto_sombra.get_rect(center=(403, 303))
+
+                    self.window.blit(texto_sombra, sombra_rect)  # Desenha a sombra
+                    self.window.blit(texto_vitoria, text_rect)  # Desenha o texto por cima
+                    # ----------------------------
 
                 if self.game_over_timer > 180:
-                    # AGORA ELE DEVOLVE "WIN" SE GANHOU, OU "GAMEOVER" SE PERDEU
                     if is_victory and not is_game_over:
                         return "WIN"
                     else:

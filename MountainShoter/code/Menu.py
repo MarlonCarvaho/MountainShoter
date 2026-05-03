@@ -41,7 +41,7 @@ class Menu:
                         return menu_option[self.opcao_selecionada]
 
             self.window.blit(source=self.surf, dest=self.rect)
-            self.menu_text(50, "jogo de terro", color_vermelho, (400, 200))
+            self.menu_text(50, "jogo de terror", color_vermelho, (400, 200))
 
             for i in range(len(menu_option)):
                 if i == self.opcao_selecionada:
