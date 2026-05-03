@@ -13,7 +13,6 @@ class Game:
     def __init__(self):
         pygame.init()
         self.window = pygame.display.set_mode((800, 600))
-        # Fonte que usaremos na tela de recordes
         self.font = pygame.font.SysFont("Lucida Sans Typewriter", 30)
 
     def run(self):
@@ -31,7 +30,6 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
-            # LÓGICA DAS FASES
             if menu_return in [menu_option[0], menu_option[1], menu_option[2]]:
                 level1 = Level(self.window, 'level1', menu_return)
                 status1, score1 = level1.run()
@@ -40,13 +38,11 @@ class Game:
                     level2 = Level(self.window, 'level2', menu_return)
                     status2, score2 = level2.run()
 
-                    # SE VENCEU A FASE 2, SOMA OS TEMPOS E SALVA!
                     if status2 == "WIN":
                         total_score = score1 + score2
                         name = self.get_player_name(total_score)
                         Score.save(name, total_score)
 
-            # LÓGICA DA TELA DE PONTUAÇÃO
             elif menu_return == menu_option[3]:
                 self.show_scores()
 
@@ -56,7 +52,6 @@ class Game:
 
             pygame.display.update()
 
-    # --- TELA PARA DIGITAR O NOME ---
     def get_player_name(self, score):
         name = ""
         while True:
@@ -65,14 +60,11 @@ class Game:
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.KEYDOWN:
-                    # Se apertar ENTER com pelo menos 1 letra, salva
                     if event.key == pygame.K_RETURN and len(name) > 0:
                         return name
-                    # Apagar a letra
                     elif event.key == pygame.K_BACKSPACE:
                         name = name[:-1]
                     else:
-                        # Limita a 10 letras para não estragar a tela de pontuação
                         if len(name) < 10 and event.unicode.isprintable():
                             name += event.unicode
 
@@ -85,7 +77,6 @@ class Game:
 
             pygame.display.flip()
 
-    # --- TELA PARA EXIBIR O TOP 7 ---
     def show_scores(self):
         while True:
             for event in pygame.event.get():
@@ -106,7 +97,6 @@ class Game:
                 self.window.blit(texto_vazio, (200, 150))
             else:
                 for i, s in enumerate(scores):
-                    # Mostra a posição, o nome e os pontos
                     texto = self.font.render(f"{i + 1}. {s['name']} - {s['score']} pts", True, (255, 255, 255))
                     self.window.blit(texto, (250, 150 + (i * 40)))
 

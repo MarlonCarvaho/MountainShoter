@@ -21,7 +21,6 @@ class EntityFactory:
 
             case "Inimigo":
                 nome_sorteado = random.choice(["inimigo1", "inimigo2", "inimigo3"])
-                # Passa a dificuldade para o inimigo!
                 return Enemy(nome_sorteado, position, difficulty)
 
             case "fase01pt1":
@@ -32,7 +31,6 @@ class EntityFactory:
                 return list_bg
 
             case "faze02":
-                # Lendo exatamente os arquivos da sua imagem: faze02pt01 até faze02pt06
                 list_bg = []
                 for i in range(1, 7):
                     list_bg.append(Background(f'faze02pt0{i}', (0, 0)))

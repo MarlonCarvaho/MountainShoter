@@ -4,7 +4,7 @@ from code.Entity import Entity
 
 class Projectile(Entity):
     def __init__(self, name: str, position: tuple, speed_x: int):
-        # Magia menor (30x15) para ficar proporcional
+
         super().__init__(name, position, size=(30, 15))
         self.speed_x = speed_x
 

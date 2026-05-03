@@ -15,18 +15,15 @@ class Player(Entity):
         self.shoot_delay = 0
         self.orientation = 1
 
-        # --- NOVAS VARIÁVEIS DE VIDA/MORTE ---
         self.is_dead = False
         self.respawn_timer = 0
 
-        # Guardamos a imagem dele vivo
         self.image_alive = self.surf
-        # Carregamos a imagem dele morto direto da sua pasta asset e ajustamos o tamanho
+
         img_dead = pygame.image.load(f"./asset/mago{self.player_type}_morreu.png").convert_alpha()
         self.image_dead = pygame.transform.scale(img_dead, (50, 50))
 
     def set_orientation(self, orientation: int):
-        # Uma função inteligente para virar o mago (vivo e morto) para a esquerda se necessário!
         self.orientation = orientation
         if self.orientation == -1:
             self.image_alive = pygame.transform.flip(self.image_alive, True, False)
@@ -34,25 +31,25 @@ class Player(Entity):
             self.surf = self.image_alive
 
     def die(self):
-        # O que acontece quando ele morre
+
         self.is_dead = True
         self.health = 0
-        self.surf = self.image_dead  # Troca para a imagem caída no chão
+        self.surf = self.image_dead
 
     def revive(self):
-        # O que acontece quando o timer chega a zero
+
         self.is_dead = False
         self.health = self.max_health
-        self.surf = self.image_alive  # Levanta do chão!
+        self.surf = self.image_alive
 
     def move(self):
-        # Se estiver morto, ele NÃO anda. Apenas conta o cronômetro para reviver.
+
         if self.is_dead:
             if self.respawn_timer > 0:
                 self.respawn_timer -= 1
                 if self.respawn_timer <= 0:
                     self.revive()
-            return  # Interrompe a função move() aqui
+            return
 
         keys = pygame.key.get_pressed()
 
@@ -80,7 +77,6 @@ class Player(Entity):
             self.shoot_delay -= 1
 
     def shoot(self):
-        # Se estiver morto, não pode atirar
         if self.is_dead:
             return None
 

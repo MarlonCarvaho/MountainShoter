@@ -5,12 +5,11 @@ import pygame
 
 
 class Entity(ABC):
-    # Adicionamos o 'size' aqui
+
     def __init__(self, name: str, position: tuple, size: tuple = None):
         self.name = name
         self.surf = pygame.image.load("./asset/" + name + ".png").convert_alpha()
 
-        # Se passarmos um tamanho, o Pygame espreme a imagem para caber nele!
         if size:
             self.surf = pygame.transform.scale(self.surf, size)
 
