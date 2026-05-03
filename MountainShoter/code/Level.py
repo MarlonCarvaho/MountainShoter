@@ -15,7 +15,6 @@ class Level:
         self.name = name
         self.game_mode = game_mode
 
-        # --- CARREGA RECURSOS BASEADO NA FASE ---
         if self.name == 'level1':
             self.bg_list = EntityFactory.get_entity('fase01pt1')
             pygame.mixer.music.load('./asset/fase01.wav')
@@ -50,12 +49,9 @@ class Level:
         font_timer = pygame.font.SysFont("Lucida Sans Typewriter", 18)
         font_hud = pygame.font.SysFont("Lucida Sans Typewriter", 24)
 
-        # --- NOVA FONTE PARA A MENSAGEM DE FASE ---
-        # Lendo a mesma fonte de terror do menu (tamanho 65 para ficar grande)
         try:
             font_msg = pygame.font.Font('./asset/Creepster-Regular.ttf', 65)
         except:
-            # Fonte de segurança caso o arquivo mude de nome
             font_msg = pygame.font.SysFont("Lucida Sans Typewriter", 65)
 
         while True:
@@ -178,7 +174,6 @@ class Level:
                 texto_kills = font_hud.render(f"Abates: {self.enemies_killed}/10", True, (255, 255, 255))
                 self.window.blit(texto_kills, (350, 35))
 
-            # --- SISTEMA DE RETORNO DO RESULTADO ---
             is_game_over = False
             is_victory = False
 
@@ -198,27 +193,19 @@ class Level:
 
                 if is_victory and not is_game_over:
                     texto_msg = "INICIANDO FASE 2..." if self.name == 'level1' else "VOCÊ ZEROU O JOGO!"
-
-                    # --- MELHORIA DA MENSAGEM ---
-                    # Renderiza com cor branca brilhante para destacar bastante
                     texto_vitoria = font_msg.render(texto_msg, True, (255, 255, 255))
-
-                    # Centraliza perfeitamente no meio da tela (800x600 -> o meio é 400x300)
                     text_rect = texto_vitoria.get_rect(center=(400, 300))
-
-                    # Cria a sombra preta para o texto saltar aos olhos e não se misturar com o fundo
                     texto_sombra = font_msg.render(texto_msg, True, (0, 0, 0))
                     sombra_rect = texto_sombra.get_rect(center=(403, 303))
-
-                    self.window.blit(texto_sombra, sombra_rect)  # Desenha a sombra
-                    self.window.blit(texto_vitoria, text_rect)  # Desenha o texto por cima
-                    # ----------------------------
+                    self.window.blit(texto_sombra, sombra_rect)
+                    self.window.blit(texto_vitoria, text_rect)
 
                 if self.game_over_timer > 180:
+                    # AGORA ELE RETORNA UMA DUPLA: O STATUS E OS SEGUNDOS RESTANTES!
                     if is_victory and not is_game_over:
-                        return "WIN"
+                        return "WIN", max(0, self.survive_timer // 60)
                     else:
-                        return "GAMEOVER"
+                        return "GAMEOVER", 0
             else:
                 self.game_over_timer = 0
 
